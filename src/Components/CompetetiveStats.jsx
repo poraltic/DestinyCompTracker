@@ -392,12 +392,29 @@ function CompetetiveStats() {
     const accordionItems = payload.PGCRs.map((PGCR, index) => {
       const teamTables = PGCR.teams.map((team, index) => {
         return (
+          mobileLayout ? <div>
+          <h1 align="center">{team.standing.standing}</h1>
+          <h1 align="center">{team.standing.score}</h1>
+          <Table striped bordered hover key={index + 1000000000} style={{maxWidth: "90vw", tableLayout: 'fixed'}}>
+            <thead>
+              <tr key={index + 100} style={{width: "90vw"}}>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Kills</th>
+                <th>Deaths</th>
+                <th>Assists</th>
+                <th>KDA</th>
+              </tr>
+            </thead>
+            <tbody>{genTables(team)}</tbody>
+          </Table>
+        </div> :
           <div class="col-6">
             <h1 align="center">{team.standing.standing}</h1>
             <h1 align="center">{team.standing.score}</h1>
-            <Table striped bordered hover key={index + 1000000000}>
+            <Table striped bordered hover key={index + 1000000000} style={{maxWidth: "90vw"}}>
               <thead>
-                <tr key={index + 100}>
+                <tr key={index + 100} style={{maxWidth: "90vw"}}>
                   <th>Rank</th>
                   <th>Player</th>
                   <th>Kills</th>
@@ -457,7 +474,7 @@ function CompetetiveStats() {
   return (
     <Container fluid="xs" className="py-4 px-3">
       {
-        mobileLayout ? <div><Form.Label>Enter Bungie ID to see match history</Form.Label>
+        mobileLayout ? <div><Form.Label style={{width: "100vw"}}>Enter Bungie ID to see match history</Form.Label>
         <InputGroup hasValidation>
           <Form.Control
             required
@@ -484,7 +501,7 @@ function CompetetiveStats() {
             Loading <Spinner animation="border" size="sm" />
           </div>
         ) : player?.isPublic ? (
-          <Accordion key="unique">{pgcrItems}</Accordion>
+          <Accordion key="unique" >{pgcrItems}</Accordion>
         ) : player?.isPublic === undefined ? (
           <div></div>
         ) : (
