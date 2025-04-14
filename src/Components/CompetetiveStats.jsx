@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Spinner from "react-bootstrap/Spinner";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -17,6 +18,8 @@ function CompetetiveStats() {
   const [pgcrItems, setpgcrItems] = useState([]);
   const [bungieId, setBungieId] = useState("");
   const [player, setPlayer] = useState({});
+  const [loading, setLoading] = useState(false);
+  const mobileLayout = screen.width <= 800;
   const regEx = new RegExp(/.+#\d{4}$/);
 
   const gatherPlayerData = async (userBungieId) => {
@@ -163,7 +166,6 @@ function CompetetiveStats() {
           rankProgress.data.Response.characterProgressions.data[characterId]
             .progressions[rankId].stepIndex;
         const playerRank = rankLevel[step];
-        console.log(playerRank);
         return {
           progress,
           rankDivision: playerRank.stepName,
@@ -223,53 +225,28 @@ function CompetetiveStats() {
         const teamTwoPlayers = [];
         let period = response.data.Response.period;
         let modeName = getModeName(mode);
-        teams = response.data.Response.teams.map((team) => {
-          return {
-            teamId: team.teamId,
-            standing: {
-              score: team.score.basic.displayValue,
-              standing: team.standing.basic.displayValue,
-            },
-            players: [],
-          };
-        });
+        try {
+          teams = response.data.Response.teams.map((team) => {
+            return {
+              teamId: team.teamId,
+              standing: {
+                score: team.score.basic.displayValue,
+                standing: team.standing.basic.displayValue,
+              },
+              players: [],
+            };
+          });
 
-        //TODO: check ispublic to see if we can display the profile, finish building the table for the teams/players.
-        for (let playerEntry of playerEntries) {
-          const isPublic = playerEntry.player.destinyUserInfo.isPublic;
-          if (!isPublic) {
-            teams[0].teamId === playerEntry.values.team.basic.value
-              ? teamOnePlayers.push({
-                  bungieGlobalDisplayName:
-                    playerEntry.player.destinyUserInfo.bungieGlobalDisplayName,
-                  isPublic,
-                  teamId: playerEntry.values.team.basic.value,
-                  kills: playerEntry.values.kills.basic.displayValue,
-                  assists: playerEntry.values.assists.basic.displayValue,
-                  deaths: playerEntry.values.deaths.basic.displayValue,
-                  kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                })
-              : teamTwoPlayers.push({
-                  bungieGlobalDisplayName:
-                    playerEntry.player.destinyUserInfo.bungieGlobalDisplayName,
-                  isPublic,
-                  teamId: playerEntry.values.team.basic.value,
-                  kills: playerEntry.values.kills.basic.displayValue,
-                  assists: playerEntry.values.assists.basic.displayValue,
-                  deaths: playerEntry.values.deaths.basic.displayValue,
-                  kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                });
-          } else {
-            let rank;
-            if (mode === 89 || mode === 71) {
-              rank = await getRank(playerEntry);
+          //TODO: check ispublic to see if we can display the profile, finish building the table for the teams/players.
+          for (let playerEntry of playerEntries) {
+            const isPublic = playerEntry.player.destinyUserInfo.isPublic;
+            if (!isPublic) {
               teams[0].teamId === playerEntry.values.team.basic.value
                 ? teamOnePlayers.push({
-                    isPublic,
                     bungieGlobalDisplayName:
                       playerEntry.player.destinyUserInfo
                         .bungieGlobalDisplayName,
-                    rank,
+                    isPublic,
                     teamId: playerEntry.values.team.basic.value,
                     kills: playerEntry.values.kills.basic.displayValue,
                     assists: playerEntry.values.assists.basic.displayValue,
@@ -277,11 +254,10 @@ function CompetetiveStats() {
                     kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
                   })
                 : teamTwoPlayers.push({
-                    isPublic,
                     bungieGlobalDisplayName:
                       playerEntry.player.destinyUserInfo
                         .bungieGlobalDisplayName,
-                    rank,
+                    isPublic,
                     teamId: playerEntry.values.team.basic.value,
                     kills: playerEntry.values.kills.basic.displayValue,
                     assists: playerEntry.values.assists.basic.displayValue,
@@ -289,49 +265,88 @@ function CompetetiveStats() {
                     kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
                   });
             } else {
-              teams[0].teamId === playerEntry.values.team.basic.value
-                ? teamOnePlayers.push({
-                    isPublic,
-                    bungieGlobalDisplayName:
-                      playerEntry.player.destinyUserInfo
-                        .bungieGlobalDisplayName,
-                    rank,
-                    teamId: playerEntry.values.team.basic.value,
-                    kills: playerEntry.values.kills.basic.displayValue,
-                    assists: playerEntry.values.assists.basic.displayValue,
-                    deaths: playerEntry.values.deaths.basic.displayValue,
-                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                  })
-                : teamTwoPlayers.push({
-                    isPublic,
-                    bungieGlobalDisplayName:
-                      playerEntry.player.destinyUserInfo
-                        .bungieGlobalDisplayName,
-                    rank,
-                    teamId: playerEntry.values.team.basic.value,
-                    kills: playerEntry.values.kills.basic.displayValue,
-                    assists: playerEntry.values.assists.basic.displayValue,
-                    deaths: playerEntry.values.deaths.basic.displayValue,
-                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                  });
+              let rank;
+              if (mode === 89 || mode === 71) {
+                rank = await getRank(playerEntry);
+                teams[0].teamId === playerEntry.values.team.basic.value
+                  ? teamOnePlayers.push({
+                      isPublic,
+                      bungieGlobalDisplayName:
+                        playerEntry.player.destinyUserInfo
+                          .bungieGlobalDisplayName,
+                      rank,
+                      teamId: playerEntry.values.team.basic.value,
+                      kills: playerEntry.values.kills.basic.displayValue,
+                      assists: playerEntry.values.assists.basic.displayValue,
+                      deaths: playerEntry.values.deaths.basic.displayValue,
+                      kdr: playerEntry.values.killsDeathsRatio.basic
+                        .displayValue,
+                    })
+                  : teamTwoPlayers.push({
+                      isPublic,
+                      bungieGlobalDisplayName:
+                        playerEntry.player.destinyUserInfo
+                          .bungieGlobalDisplayName,
+                      rank,
+                      teamId: playerEntry.values.team.basic.value,
+                      kills: playerEntry.values.kills.basic.displayValue,
+                      assists: playerEntry.values.assists.basic.displayValue,
+                      deaths: playerEntry.values.deaths.basic.displayValue,
+                      kdr: playerEntry.values.killsDeathsRatio.basic
+                        .displayValue,
+                    });
+              } else {
+                teams[0].teamId === playerEntry.values.team.basic.value
+                  ? teamOnePlayers.push({
+                      isPublic,
+                      bungieGlobalDisplayName:
+                        playerEntry.player.destinyUserInfo
+                          .bungieGlobalDisplayName,
+                      rank,
+                      teamId: playerEntry.values.team.basic.value,
+                      kills: playerEntry.values.kills.basic.displayValue,
+                      assists: playerEntry.values.assists.basic.displayValue,
+                      deaths: playerEntry.values.deaths.basic.displayValue,
+                      kdr: playerEntry.values.killsDeathsRatio.basic
+                        .displayValue,
+                    })
+                  : teamTwoPlayers.push({
+                      isPublic,
+                      bungieGlobalDisplayName:
+                        playerEntry.player.destinyUserInfo
+                          .bungieGlobalDisplayName,
+                      rank,
+                      teamId: playerEntry.values.team.basic.value,
+                      kills: playerEntry.values.kills.basic.displayValue,
+                      assists: playerEntry.values.assists.basic.displayValue,
+                      deaths: playerEntry.values.deaths.basic.displayValue,
+                      kdr: playerEntry.values.killsDeathsRatio.basic
+                        .displayValue,
+                    });
+              }
             }
           }
+          const consolidatedTeams = [
+            {
+              ...teams[0],
+              players: teamOnePlayers,
+            },
+            {
+              ...teams[1],
+              players: teamTwoPlayers,
+            },
+          ];
+          PGCRs.push({
+            period,
+            modeName,
+            teams: consolidatedTeams,
+          });
+        } catch (e) {
+          console.log(
+            `!!!!!!!!!!!!!!!!!!!! ERROR: ${e} !!!!!!!!!!!!!!!!!!!!!!!`
+          );
+          console.log(response);
         }
-        const consolidatedTeams = [
-          {
-            ...teams[0],
-            players: teamOnePlayers,
-          },
-          {
-            ...teams[1],
-            players: teamTwoPlayers,
-          },
-        ];
-        PGCRs.push({
-          period,
-          modeName,
-          teams: consolidatedTeams,
-        });
       }
     });
     return {
@@ -344,17 +359,20 @@ function CompetetiveStats() {
     {
       return team.players.map((player, index) => (
         <tr key={index + 100000000}>
-          <td>
+          <td align="center">
             {player.isPublic ? (
               player?.rank === undefined ? (
                 "NonComp"
               ) : (
                 <div>
-                  <p>{player.rank.progress}</p>
                   <img
-                    src={`${player.rank.rankIconSrc}`}
+                    src={player.rank.rankIconSrc}
                     alt={player.rank.rankDivision}
+                    title={player.rank.rankDivision}
+                    height="75rem"
+                    width="75rem"
                   ></img>
+                  <p>{player.rank.progress}</p>
                 </div>
               )
             ) : (
@@ -374,42 +392,33 @@ function CompetetiveStats() {
     const accordionItems = payload.PGCRs.map((PGCR, index) => {
       const teamTables = PGCR.teams.map((team, index) => {
         return (
-          <Table striped bordered hover key={index + 1000000000}>
-            <thead>
-              <tr key={index + 100}>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Kills</th>
-                <th>Deaths</th>
-                <th>Assists</th>
-                <th>KDA</th>
-              </tr>
-            </thead>
-            <tbody>{genTables(team)}</tbody>
-          </Table>
+          <div class="col-6">
+            <h1 align="center">{team.standing.standing}</h1>
+            <h1 align="center">{team.standing.score}</h1>
+            <Table striped bordered hover key={index + 1000000000}>
+              <thead>
+                <tr key={index + 100}>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>Kills</th>
+                  <th>Deaths</th>
+                  <th>Assists</th>
+                  <th>KDA</th>
+                </tr>
+              </thead>
+              <tbody>{genTables(team)}</tbody>
+            </Table>
+          </div>
         );
       });
       return (
         <Accordion.Item eventKey={index} key={index}>
           <Accordion.Header>{PGCR.modeName}</Accordion.Header>
-          <Accordion.Body key={index + 100000}>{teamTables}</Accordion.Body>
+            <Accordion.Body key={index + 100000}><Row>{teamTables}</Row></Accordion.Body>
         </Accordion.Item>
       );
     });
     setpgcrItems(accordionItems);
-    // The format for the matches after we pull everything
-    //   <Accordion.Item eventKey="0" key="0">
-    //   <Accordion.Header>Some Game 1</Accordion.Header>
-    //   <Accordion.Body>
-    //     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-    //     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-    //     veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-    //     commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-    //     velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-    //     occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-    //     mollit anim id est laborum.
-    //   </Accordion.Body>
-    // </Accordion.Item>,
   };
 
   const handleClick = async () => {
@@ -421,6 +430,7 @@ function CompetetiveStats() {
         </div>
       );
     } else {
+      setLoading(true);
       setinvalidText(<div></div>);
       return Promise.resolve()
         .then(() => {
@@ -437,14 +447,50 @@ function CompetetiveStats() {
         })
         .then((payload) => {
           return finalizePGCRs(payload);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   };
-  useEffect(() => {}, [pgcrItems, player]);
+  useEffect(() => {}, [pgcrItems, player, screen.width]);
   return (
     <Container fluid="xs" className="py-4 px-3">
-      <Row className="mb-3">
-        <Col xs={4}>
+      {
+        mobileLayout ? <div><Form.Label>Enter Bungie ID to see match history</Form.Label>
+        <InputGroup hasValidation>
+          <Form.Control
+            required
+            id="userBungieId"
+            placeholder="Enter Bungie ID here..."
+            aria-label="bungieIdInput"
+            type="text"
+            pattern=".+#\d{4}$"
+            onChange={(e) => {
+              setBungieId(e.target.value);
+            }}
+          />
+          <Button
+            variant="outline-primary"
+            type="button"
+            onClick={handleClick}
+          >
+            Submit
+          </Button>
+        </InputGroup>
+        {invalidText}
+        {loading ? (
+          <div>
+            Loading <Spinner animation="border" size="sm" />
+          </div>
+        ) : player?.isPublic ? (
+          <Accordion key="unique">{pgcrItems}</Accordion>
+        ) : player?.isPublic === undefined ? (
+          <div></div>
+        ) : (
+          <div>Bungie Profile is set to private :(.</div>
+        )}</div> : <Row className="mb-3">
+        <Col xs={3}>
           <Form.Label>Enter Bungie ID to see match history</Form.Label>
           <InputGroup hasValidation>
             <Form.Control
@@ -468,8 +514,13 @@ function CompetetiveStats() {
           </InputGroup>
           {invalidText}
         </Col>
-        <Col xs={8}>
-          {player?.isPublic ? (
+        <Col xs={9}>
+
+          {loading ? (
+            <div>
+              Loading <Spinner animation="border" size="sm" />
+            </div>
+          ) : player?.isPublic ? (
             <Accordion key="unique">{pgcrItems}</Accordion>
           ) : player?.isPublic === undefined ? (
             <div></div>
@@ -478,6 +529,7 @@ function CompetetiveStats() {
           )}
         </Col>
       </Row>
+      }
     </Container>
   );
 }
