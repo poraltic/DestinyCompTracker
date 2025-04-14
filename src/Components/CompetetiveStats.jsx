@@ -9,6 +9,7 @@ import Accordion from "react-bootstrap/Accordion";
 import axios from "axios";
 import { API_CALLS } from "./helpers/API_CALLS";
 import Table from "react-bootstrap/Table";
+import rankLevels from "./helpers/rankLevels";
 
 function CompetetiveStats() {
   const apiKey = import.meta.env.VITE_API_KEY;
@@ -142,36 +143,31 @@ function CompetetiveStats() {
     const rankId = "3696598664";
     const membershipId = playerEntry.player.destinyUserInfo.membershipId;
     const membershipType = playerEntry.player.destinyUserInfo.membershipType;
-    const [rankLevels, rankProgress] = await Promise.all([
-      axios({
-        ...baseConfig,
-        url: `${API_CALLS.COMMON_URL}/Destiny2/Manifest/DestinyProgressionDefinition/${rankId}/ `,
-      }),
+    const [rankProgress] = await Promise.all([
       axios({
         ...baseConfig,
         url: `${API_CALLS.COMMON_URL}/Destiny2/${membershipType}/Profile/${membershipId}/?components=CharacterProgressions,Profiles`,
       }),
     ]);
-
-    let rankLevel;
     let progress;
     let step;
     try {
       if (rankProgress.data.Response.characterProgressions.data) {
         const characterId =
           rankProgress.data.Response.profile.data.characterIds[0];
-        rankLevel = rankLevels.data.Response.steps;
+        const rankLevel = rankLevels.Response.steps;
         progress =
           rankProgress.data.Response.characterProgressions.data[characterId]
             .progressions[rankId].currentProgress;
         step =
           rankProgress.data.Response.characterProgressions.data[characterId]
             .progressions[rankId].stepIndex;
-
+        const playerRank = rankLevel[step];
+        console.log(playerRank);
         return {
           progress,
-          rankDivision: rankLevel[step].stepName,
-          rankIconSrc: `https://www.bungie.net${rankLevel[step].icon}`,
+          rankDivision: playerRank.stepName,
+          rankIconSrc: `https://www.bungie.net${playerRank.icon}`,
         };
       } else {
         return {
@@ -202,9 +198,7 @@ function CompetetiveStats() {
 
   const gatherPGCRs = async (profile) => {
     let instanceIds = profile.instanceIds;
-    let modeName;
-    let teams = [];
-    let period;
+    let PGCRs = [];
     const baseConfig = {
       method: "get",
       headers: {
@@ -213,18 +207,22 @@ function CompetetiveStats() {
       },
     };
 
-    const PGCRs = await Promise.all(
+    await Promise.all(
       instanceIds.map((id) => {
         return axios({
           ...baseConfig,
           url: `${API_CALLS.COMMON_URL}/Destiny2/Stats/PostGameCarnageReport/${id}/ `,
         });
       })
-    ).then((responses) => {
-      return responses.map((response) => {
+    ).then(async (responses) => {
+      for (let response of responses) {
+        let teams = [];
         const mode = response.data.Response.activityDetails.mode;
-        period = response.data.Response.period;
-        modeName = getModeName(mode);
+        const playerEntries = response.data.Response.entries;
+        const teamOnePlayers = [];
+        const teamTwoPlayers = [];
+        let period = response.data.Response.period;
+        let modeName = getModeName(mode);
         teams = response.data.Response.teams.map((team) => {
           return {
             teamId: team.teamId,
@@ -235,11 +233,9 @@ function CompetetiveStats() {
             players: [],
           };
         });
-        const playerEntries = response.data.Response.entries;
-        const teamOnePlayers = [];
-        const teamTwoPlayers = [];
+
         //TODO: check ispublic to see if we can display the profile, finish building the table for the teams/players.
-        playerEntries.map(async (playerEntry) => {
+        for (let playerEntry of playerEntries) {
           const isPublic = playerEntry.player.destinyUserInfo.isPublic;
           if (!isPublic) {
             teams[0].teamId === playerEntry.values.team.basic.value
@@ -267,32 +263,60 @@ function CompetetiveStats() {
             let rank;
             if (mode === 89 || mode === 71) {
               rank = await getRank(playerEntry);
+              teams[0].teamId === playerEntry.values.team.basic.value
+                ? teamOnePlayers.push({
+                    isPublic,
+                    bungieGlobalDisplayName:
+                      playerEntry.player.destinyUserInfo
+                        .bungieGlobalDisplayName,
+                    rank,
+                    teamId: playerEntry.values.team.basic.value,
+                    kills: playerEntry.values.kills.basic.displayValue,
+                    assists: playerEntry.values.assists.basic.displayValue,
+                    deaths: playerEntry.values.deaths.basic.displayValue,
+                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
+                  })
+                : teamTwoPlayers.push({
+                    isPublic,
+                    bungieGlobalDisplayName:
+                      playerEntry.player.destinyUserInfo
+                        .bungieGlobalDisplayName,
+                    rank,
+                    teamId: playerEntry.values.team.basic.value,
+                    kills: playerEntry.values.kills.basic.displayValue,
+                    assists: playerEntry.values.assists.basic.displayValue,
+                    deaths: playerEntry.values.deaths.basic.displayValue,
+                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
+                  });
+            } else {
+              teams[0].teamId === playerEntry.values.team.basic.value
+                ? teamOnePlayers.push({
+                    isPublic,
+                    bungieGlobalDisplayName:
+                      playerEntry.player.destinyUserInfo
+                        .bungieGlobalDisplayName,
+                    rank,
+                    teamId: playerEntry.values.team.basic.value,
+                    kills: playerEntry.values.kills.basic.displayValue,
+                    assists: playerEntry.values.assists.basic.displayValue,
+                    deaths: playerEntry.values.deaths.basic.displayValue,
+                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
+                  })
+                : teamTwoPlayers.push({
+                    isPublic,
+                    bungieGlobalDisplayName:
+                      playerEntry.player.destinyUserInfo
+                        .bungieGlobalDisplayName,
+                    rank,
+                    teamId: playerEntry.values.team.basic.value,
+                    kills: playerEntry.values.kills.basic.displayValue,
+                    assists: playerEntry.values.assists.basic.displayValue,
+                    deaths: playerEntry.values.deaths.basic.displayValue,
+                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
+                  });
             }
-            teams[0].teamId === playerEntry.values.team.basic.value
-              ? teamOnePlayers.push({
-                  isPublic,
-                  bungieGlobalDisplayName:
-                    playerEntry.player.destinyUserInfo.bungieGlobalDisplayName,
-                  rank,
-                  teamId: playerEntry.values.team.basic.value,
-                  kills: playerEntry.values.kills.basic.displayValue,
-                  assists: playerEntry.values.assists.basic.displayValue,
-                  deaths: playerEntry.values.deaths.basic.displayValue,
-                  kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                })
-              : teamTwoPlayers.push({
-                  isPublic,
-                  bungieGlobalDisplayName:
-                    playerEntry.player.destinyUserInfo.bungieGlobalDisplayName,
-                  rank,
-                  teamId: playerEntry.values.team.basic.value,
-                  kills: playerEntry.values.kills.basic.displayValue,
-                  assists: playerEntry.values.assists.basic.displayValue,
-                  deaths: playerEntry.values.deaths.basic.displayValue,
-                  kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                });
           }
-        });
+        }
         const consolidatedTeams = [
           {
             ...teams[0],
@@ -303,12 +327,12 @@ function CompetetiveStats() {
             players: teamTwoPlayers,
           },
         ];
-        return {
+        PGCRs.push({
           period,
           modeName,
           teams: consolidatedTeams,
-        };
-      });
+        });
+      }
     });
     return {
       ...profile,
@@ -317,28 +341,43 @@ function CompetetiveStats() {
   };
 
   const genTables = (team) => {
-    console.log(team)
-    return team.players.map((player, key) => {
-      return (
-        <tr key={key+1000}>
-          <td>?</td>
-          <td>{player?.bungieGlobalDisplayName}</td>
-          <td>{player?.kills}</td>
-          <td>{player?.deaths}</td>
-          <td>{player?.assists}</td>
-          <td>{player?.kdr}</td>
+    {
+      return team.players.map((player, index) => (
+        <tr key={index + 100000000}>
+          <td>
+            {player.isPublic ? (
+              player?.rank === undefined ? (
+                "NonComp"
+              ) : (
+                <div>
+                  <p>{player.rank.progress}</p>
+                  <img
+                    src={`${player.rank.rankIconSrc}`}
+                    alt={player.rank.rankDivision}
+                  ></img>
+                </div>
+              )
+            ) : (
+              "Privated"
+            )}
+          </td>
+          <td>{player.bungieGlobalDisplayName}</td>
+          <td>{player.kills}</td>
+          <td>{player.deaths}</td>
+          <td>{player.assists}</td>
+          <td>{player.kdr}</td>
         </tr>
-      );
-      });
-  }
+      ));
+    }
+  };
   const finalizePGCRs = (payload) => {
     const accordionItems = payload.PGCRs.map((PGCR, index) => {
       const teamTables = PGCR.teams.map((team, index) => {
         return (
-          <Table striped bordered hover key={index+1000000000}>
+          <Table striped bordered hover key={index + 1000000000}>
             <thead>
-              <tr key={index+100}>
-                <th>rank</th>
+              <tr key={index + 100}>
+                <th>Rank</th>
                 <th>Player</th>
                 <th>Kills</th>
                 <th>Deaths</th>
@@ -346,16 +385,14 @@ function CompetetiveStats() {
                 <th>KDA</th>
               </tr>
             </thead>
-            <tbody>
-              {genTables(team)}
-            </tbody>
+            <tbody>{genTables(team)}</tbody>
           </Table>
         );
       });
       return (
         <Accordion.Item eventKey={index} key={index}>
           <Accordion.Header>{PGCR.modeName}</Accordion.Header>
-          <Accordion.Body key={index+100000}>{teamTables}</Accordion.Body>
+          <Accordion.Body key={index + 100000}>{teamTables}</Accordion.Body>
         </Accordion.Item>
       );
     });
@@ -432,9 +469,9 @@ function CompetetiveStats() {
           {invalidText}
         </Col>
         <Col xs={8}>
-          {player.isPublic ? (
+          {player?.isPublic ? (
             <Accordion key="unique">{pgcrItems}</Accordion>
-          ) : player.isPublic === undefined ? (
+          ) : player?.isPublic === undefined ? (
             <div></div>
           ) : (
             <div>Bungie Profile is set to private :(.</div>
