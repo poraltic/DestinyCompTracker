@@ -430,7 +430,7 @@ function CompetetiveStats() {
       });
       return (
         <Accordion.Item eventKey={index} key={index}>
-          <Accordion.Header>{PGCR.modeName}</Accordion.Header>
+          <Accordion.Header>{PGCR.modeName} - {PGCR.period}</Accordion.Header>
             <Accordion.Body key={index + 100000}><Row>{teamTables}</Row></Accordion.Body>
         </Accordion.Item>
       );
