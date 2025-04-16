@@ -343,7 +343,7 @@ function CompetetiveStats() {
           });
         } catch (e) {
           console.log(
-            `!!!!!!!!!!!!!!!!!!!! ERROR: ${e} !!!!!!!!!!!!!!!!!!!!!!!`
+            `ERROR: ${e}`
           );
           console.log(response);
         }
