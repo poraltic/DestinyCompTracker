@@ -11,6 +11,7 @@ import axios from "axios";
 import { API_CALLS } from "./helpers/API_CALLS";
 import Table from "react-bootstrap/Table";
 import rankLevels from "./helpers/rankLevels";
+import _ from "lodash";
 
 function CompetetiveStats() {
   const apiKey = import.meta.env.VITE_API_KEY;
@@ -41,10 +42,13 @@ function CompetetiveStats() {
     };
     await axios(config)
       .then((response) => {
-        crossSaveProfile = response.data.Response.find((profile) => {
-          if (profile.crossSaveOverride === profile.membershipType)
-            return profile.membershipType;
-        });
+        crossSaveProfile =
+          response.data.Response.length === 1
+            ? response.data.Response[0].profile.membershipType
+            : response.data.Response.find((profile) => {
+                if (profile.crossSaveOverride === profile.membershipType)
+                  return profile.membershipType;
+              });
         setPlayer({
           bungieName: displayName,
           bungieId: displayNameCode,
@@ -56,6 +60,7 @@ function CompetetiveStats() {
       .catch(function (error) {
         console.log(error);
       });
+
     return crossSaveProfile;
   };
 
@@ -79,6 +84,7 @@ function CompetetiveStats() {
       .catch(function (error) {
         console.log(error);
       });
+
     return profileWithIds;
   };
 
@@ -100,15 +106,12 @@ function CompetetiveStats() {
       characterIds.map((id) => {
         return axios({
           ...baseConfig,
-          url: `${API_CALLS.COMMON_URL}/Destiny2/${profile.membershipType}/Account/${profile.membershipId}/Character/${id}/Stats/Activities/?mode=5`,
+          url: `${API_CALLS.COMMON_URL}/Destiny2/${profile.membershipType}/Account/${profile.membershipId}/Character/${id}/Stats/Activities/?mode=5&count=50`,
         });
       })
     ).then((responses) => {
-      const activities = responses.map((response) => {
-        return response.data.Response.activities;
-      });
-      activities.map((activity) => {
-        activity.map((instance) => {
+      responses.map((response) => {
+        response.data.Response.activities.map((instance) => {
           if (new Date(instance.period) > checkDate) {
             instanceIds.push(instance.activityDetails.instanceId);
           }
@@ -132,12 +135,10 @@ function CompetetiveStats() {
     const rankId = "3696598664";
     const membershipId = playerEntry.player.destinyUserInfo.membershipId;
     const membershipType = playerEntry.player.destinyUserInfo.membershipType;
-    const [rankProgress] = await Promise.all([
-      axios({
-        ...baseConfig,
-        url: `${API_CALLS.COMMON_URL}/Destiny2/${membershipType}/Profile/${membershipId}/?components=CharacterProgressions,Profiles`,
-      }),
-    ]);
+    const rankProgress = await axios({
+      ...baseConfig,
+      url: `${API_CALLS.COMMON_URL}/Destiny2/${membershipType}/Profile/${membershipId}/?components=CharacterProgressions,Profiles`,
+    });
     let progress;
     let step;
     try {
@@ -174,7 +175,7 @@ function CompetetiveStats() {
       case 43:
         return "Iron Banner Control";
       case 89:
-        return "Competitive Control (3v3)";
+        return "Competitive Collision (3v3 Control)";
       case 71:
         return "Competitive Clash (3v3)";
       case 84:
@@ -203,137 +204,146 @@ function CompetetiveStats() {
         });
       })
     ).then(async (responses) => {
-      for (let response of responses) {
-        let teams = [];
-        const mode = response.data.Response.activityDetails.mode;
-        const playerEntries = response.data.Response.entries;
-        const teamOnePlayers = [];
-        const teamTwoPlayers = [];
-        let period = response.data.Response.period;
-        let modeName = getModeName(mode);
-        try {
-          teams = response.data.Response.teams.map((team) => {
-            return {
-              teamId: team.teamId,
-              standing: {
-                score: team.score.basic.displayValue,
-                standing: team.standing.basic.displayValue,
-              },
-              players: [],
-            };
-          });
+      let chunkedResponses = _.chunk(responses, 2);
+      await Promise.all(
+        chunkedResponses.map(async (responses) => {
+          for (let response of responses) {
+            let teams = [];
+            const mode = response.data.Response.activityDetails.mode;
+            const playerEntries = response.data.Response.entries;
+            const teamOnePlayers = [];
+            const teamTwoPlayers = [];
+            let period = response.data.Response.period;
+            let modeName = getModeName(mode);
+            try {
+              teams = response.data.Response.teams.map((team) => {
+                return {
+                  teamId: team.teamId,
+                  standing: {
+                    score: team.score.basic.displayValue,
+                    standing: team.standing.basic.displayValue,
+                  },
+                  players: [],
+                };
+              });
 
-          //TODO: check ispublic to see if we can display the profile, finish building the table for the teams/players.
-          for (let playerEntry of playerEntries) {
-            const isPublic = playerEntry.player.destinyUserInfo.isPublic;
-            if (!isPublic) {
-              teams[0].teamId === playerEntry.values.team.basic.value
-                ? teamOnePlayers.push({
-                    bungieGlobalDisplayName:
-                      playerEntry.player.destinyUserInfo
-                        .bungieGlobalDisplayName,
-                    isPublic,
-                    teamId: playerEntry.values.team.basic.value,
-                    kills: playerEntry.values.kills.basic.displayValue,
-                    assists: playerEntry.values.assists.basic.displayValue,
-                    deaths: playerEntry.values.deaths.basic.displayValue,
-                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                  })
-                : teamTwoPlayers.push({
-                    bungieGlobalDisplayName:
-                      playerEntry.player.destinyUserInfo
-                        .bungieGlobalDisplayName,
-                    isPublic,
-                    teamId: playerEntry.values.team.basic.value,
-                    kills: playerEntry.values.kills.basic.displayValue,
-                    assists: playerEntry.values.assists.basic.displayValue,
-                    deaths: playerEntry.values.deaths.basic.displayValue,
-                    kdr: playerEntry.values.killsDeathsRatio.basic.displayValue,
-                  });
-            } else {
-              let rank;
-              if (mode === 89 || mode === 71) {
-                rank = await getRank(playerEntry);
-                teams[0].teamId === playerEntry.values.team.basic.value
-                  ? teamOnePlayers.push({
-                      isPublic,
-                      bungieGlobalDisplayName:
-                        playerEntry.player.destinyUserInfo
-                          .bungieGlobalDisplayName,
-                      rank,
-                      teamId: playerEntry.values.team.basic.value,
-                      kills: playerEntry.values.kills.basic.displayValue,
-                      assists: playerEntry.values.assists.basic.displayValue,
-                      deaths: playerEntry.values.deaths.basic.displayValue,
-                      kdr: playerEntry.values.killsDeathsRatio.basic
-                        .displayValue,
-                    })
-                  : teamTwoPlayers.push({
-                      isPublic,
-                      bungieGlobalDisplayName:
-                        playerEntry.player.destinyUserInfo
-                          .bungieGlobalDisplayName,
-                      rank,
-                      teamId: playerEntry.values.team.basic.value,
-                      kills: playerEntry.values.kills.basic.displayValue,
-                      assists: playerEntry.values.assists.basic.displayValue,
-                      deaths: playerEntry.values.deaths.basic.displayValue,
-                      kdr: playerEntry.values.killsDeathsRatio.basic
-                        .displayValue,
-                    });
-              } else {
-                teams[0].teamId === playerEntry.values.team.basic.value
-                  ? teamOnePlayers.push({
-                      isPublic,
-                      bungieGlobalDisplayName:
-                        playerEntry.player.destinyUserInfo
-                          .bungieGlobalDisplayName,
-                      rank,
-                      teamId: playerEntry.values.team.basic.value,
-                      kills: playerEntry.values.kills.basic.displayValue,
-                      assists: playerEntry.values.assists.basic.displayValue,
-                      deaths: playerEntry.values.deaths.basic.displayValue,
-                      kdr: playerEntry.values.killsDeathsRatio.basic
-                        .displayValue,
-                    })
-                  : teamTwoPlayers.push({
-                      isPublic,
-                      bungieGlobalDisplayName:
-                        playerEntry.player.destinyUserInfo
-                          .bungieGlobalDisplayName,
-                      rank,
-                      teamId: playerEntry.values.team.basic.value,
-                      kills: playerEntry.values.kills.basic.displayValue,
-                      assists: playerEntry.values.assists.basic.displayValue,
-                      deaths: playerEntry.values.deaths.basic.displayValue,
-                      kdr: playerEntry.values.killsDeathsRatio.basic
-                        .displayValue,
-                    });
+              //TODO: check ispublic to see if we can display the profile, finish building the table for the teams/players.
+              for (let playerEntry of playerEntries) {
+                const isPublic = playerEntry.player.destinyUserInfo.isPublic;
+                if (!isPublic) {
+                  teams[0].teamId === playerEntry.values.team.basic.value
+                    ? teamOnePlayers.push({
+                        bungieGlobalDisplayName:
+                          playerEntry.player.destinyUserInfo
+                            .bungieGlobalDisplayName,
+                        isPublic,
+                        teamId: playerEntry.values.team.basic.value,
+                        kills: playerEntry.values.kills.basic.displayValue,
+                        assists: playerEntry.values.assists.basic.displayValue,
+                        deaths: playerEntry.values.deaths.basic.displayValue,
+                        kdr: playerEntry.values.killsDeathsRatio.basic
+                          .displayValue,
+                      })
+                    : teamTwoPlayers.push({
+                        bungieGlobalDisplayName:
+                          playerEntry.player.destinyUserInfo
+                            .bungieGlobalDisplayName,
+                        isPublic,
+                        teamId: playerEntry.values.team.basic.value,
+                        kills: playerEntry.values.kills.basic.displayValue,
+                        assists: playerEntry.values.assists.basic.displayValue,
+                        deaths: playerEntry.values.deaths.basic.displayValue,
+                        kdr: playerEntry.values.killsDeathsRatio.basic
+                          .displayValue,
+                      });
+                } else {
+                  let rank;
+                  if (mode === 89 || mode === 71) {
+                    rank = await getRank(playerEntry);
+                    teams[0].teamId === playerEntry.values.team.basic.value
+                      ? teamOnePlayers.push({
+                          isPublic,
+                          bungieGlobalDisplayName:
+                            playerEntry.player.destinyUserInfo
+                              .bungieGlobalDisplayName,
+                          rank,
+                          teamId: playerEntry.values.team.basic.value,
+                          kills: playerEntry.values.kills.basic.displayValue,
+                          assists:
+                            playerEntry.values.assists.basic.displayValue,
+                          deaths: playerEntry.values.deaths.basic.displayValue,
+                          kdr: playerEntry.values.killsDeathsRatio.basic
+                            .displayValue,
+                        })
+                      : teamTwoPlayers.push({
+                          isPublic,
+                          bungieGlobalDisplayName:
+                            playerEntry.player.destinyUserInfo
+                              .bungieGlobalDisplayName,
+                          rank,
+                          teamId: playerEntry.values.team.basic.value,
+                          kills: playerEntry.values.kills.basic.displayValue,
+                          assists:
+                            playerEntry.values.assists.basic.displayValue,
+                          deaths: playerEntry.values.deaths.basic.displayValue,
+                          kdr: playerEntry.values.killsDeathsRatio.basic
+                            .displayValue,
+                        });
+                  } else {
+                    teams[0].teamId === playerEntry.values.team.basic.value
+                      ? teamOnePlayers.push({
+                          isPublic,
+                          bungieGlobalDisplayName:
+                            playerEntry.player.destinyUserInfo
+                              .bungieGlobalDisplayName,
+                          rank,
+                          teamId: playerEntry.values.team.basic.value,
+                          kills: playerEntry.values.kills.basic.displayValue,
+                          assists:
+                            playerEntry.values.assists.basic.displayValue,
+                          deaths: playerEntry.values.deaths.basic.displayValue,
+                          kdr: playerEntry.values.killsDeathsRatio.basic
+                            .displayValue,
+                        })
+                      : teamTwoPlayers.push({
+                          isPublic,
+                          bungieGlobalDisplayName:
+                            playerEntry.player.destinyUserInfo
+                              .bungieGlobalDisplayName,
+                          rank,
+                          teamId: playerEntry.values.team.basic.value,
+                          kills: playerEntry.values.kills.basic.displayValue,
+                          assists:
+                            playerEntry.values.assists.basic.displayValue,
+                          deaths: playerEntry.values.deaths.basic.displayValue,
+                          kdr: playerEntry.values.killsDeathsRatio.basic
+                            .displayValue,
+                        });
+                  }
+                }
               }
+              const consolidatedTeams = [
+                {
+                  ...teams[0],
+                  players: teamOnePlayers,
+                },
+                {
+                  ...teams[1],
+                  players: teamTwoPlayers,
+                },
+              ];
+              PGCRs.push({
+                period,
+                modeName,
+                teams: consolidatedTeams,
+              });
+            } catch (e) {
+              console.log(`ERROR: ${e}`);
+              console.log(response);
             }
           }
-          const consolidatedTeams = [
-            {
-              ...teams[0],
-              players: teamOnePlayers,
-            },
-            {
-              ...teams[1],
-              players: teamTwoPlayers,
-            },
-          ];
-          PGCRs.push({
-            period,
-            modeName,
-            teams: consolidatedTeams,
-          });
-        } catch (e) {
-          console.log(
-            `ERROR: ${e}`
-          );
-          console.log(response);
-        }
-      }
+        })
+      );
     });
     return {
       ...profile,
@@ -344,10 +354,15 @@ function CompetetiveStats() {
   const genTables = (team) => {
     {
       return team.players.map((player, index) => (
-        <tr key={index + 100000000}>
+        <tr
+          key={
+            index +
+            100000000 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+          }
+        >
           <td align="center">
             {player.isPublic ? (
-              player?.rank === undefined ? (
+              player?.rank === undefined ? ( 
                 "NonComp"
               ) : (
                 <div>
@@ -375,52 +390,84 @@ function CompetetiveStats() {
     }
   };
   const finalizePGCRs = (payload) => {
-    const accordionItems = payload.PGCRs.map((PGCR, index) => {
-      const teamTables = PGCR.teams.map((team, index) => {
+    const accordionItems = _.orderBy(payload.PGCRs, "period", 'desc').map(
+      (PGCR, index) => {
+        const teamTables = PGCR.teams.map((team, index) => {
+          return mobileLayout ? (
+            <div>
+              <h1 align="center">{team.standing.standing}</h1>
+              <h1 align="center">{team.standing.score}</h1>
+              <Table
+                striped
+                bordered
+                hover
+                key={index + 1000000000}
+                style={{ maxWidth: "90vw", tableLayout: "fixed" }}
+              >
+                <thead>
+                  <tr
+                    key={
+                      index +
+                      100 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+                    }
+                    style={{ width: "90vw" }}
+                  >
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Kills</th>
+                    <th>Deaths</th>
+                    <th>Assists</th>
+                    <th>KDA</th>
+                  </tr>
+                </thead>
+                <tbody>{genTables(team)}</tbody>
+              </Table>
+            </div>
+          ) : (
+            <div className="col-6">
+              <h1 align="center">{team.standing.standing}</h1>
+              <h1 align="center">{team.standing.score}</h1>
+              <Table
+                striped
+                bordered
+                hover
+                key={index + 1000000000 /* possibly do teamId + instanceId*/}
+                style={{ maxWidth: "90vw" }}
+              >
+                <thead>
+                  <tr
+                    key={
+                      index +
+                      100 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+                    }
+                    style={{ maxWidth: "90vw" }}
+                  >
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Kills</th>
+                    <th>Deaths</th>
+                    <th>Assists</th>
+                    <th>KDA</th>
+                  </tr>
+                </thead>
+                <tbody>{genTables(team)}</tbody>
+              </Table>
+            </div>
+          );
+        });
         return (
-          mobileLayout ? <div>
-          <h1 align="center">{team.standing.standing}</h1>
-          <h1 align="center">{team.standing.score}</h1>
-          <Table striped bordered hover key={index + 1000000000} style={{maxWidth: "90vw", tableLayout: 'fixed'}}>
-            <thead>
-              <tr key={index + 100} style={{width: "90vw"}}>
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Kills</th>
-                <th>Deaths</th>
-                <th>Assists</th>
-                <th>KDA</th>
-              </tr>
-            </thead>
-            <tbody>{genTables(team)}</tbody>
-          </Table>
-        </div> :
-          <div class="col-6">
-            <h1 align="center">{team.standing.standing}</h1>
-            <h1 align="center">{team.standing.score}</h1>
-            <Table striped bordered hover key={index + 1000000000} style={{maxWidth: "90vw"}}>
-              <thead>
-                <tr key={index + 100} style={{maxWidth: "90vw"}}>
-                  <th>Rank</th>
-                  <th>Player</th>
-                  <th>Kills</th>
-                  <th>Deaths</th>
-                  <th>Assists</th>
-                  <th>KDA</th>
-                </tr>
-              </thead>
-              <tbody>{genTables(team)}</tbody>
-            </Table>
-          </div>
+          <Accordion.Item eventKey={index} key={index}>
+            <Accordion.Header>
+              {PGCR.modeName} - {PGCR.period}
+            </Accordion.Header>
+            <Accordion.Body key={index + 100000}>
+              <Row>{teamTables}</Row>
+            </Accordion.Body>
+          </Accordion.Item>
         );
-      });
-      return (
-        <Accordion.Item eventKey={index} key={index}>
-          <Accordion.Header>{PGCR.modeName} - {PGCR.period}</Accordion.Header>
-            <Accordion.Body key={index + 100000}><Row>{teamTables}</Row></Accordion.Body>
-        </Accordion.Item>
-      );
-    });
+      }
+    );
+    console.log(accordionItems.length);
     setpgcrItems(accordionItems);
   };
 
@@ -459,42 +506,11 @@ function CompetetiveStats() {
   useEffect(() => {}, [pgcrItems, player, screen.width]);
   return (
     <Container fluid="xs" className="py-4 px-3">
-      {
-        mobileLayout ? <div><Form.Label style={{width: "100vw"}}>Enter Bungie ID to see match history</Form.Label>
-        <InputGroup hasValidation>
-          <Form.Control
-            required
-            id="userBungieId"
-            placeholder="Enter Bungie ID here..."
-            aria-label="bungieIdInput"
-            type="text"
-            pattern=".+#\d{4}$"
-            onChange={(e) => {
-              setBungieId(e.target.value);
-            }}
-          />
-          <Button
-            variant="outline-primary"
-            type="button"
-            onClick={handleClick}
-          >
-            Submit
-          </Button>
-        </InputGroup>
-        {invalidText}
-        {loading ? (
-          <div>
-            Loading <Spinner animation="border" size="sm" />
-          </div>
-        ) : player?.isPublic ? (
-          <Accordion key="unique" >{pgcrItems}</Accordion>
-        ) : player?.isPublic === undefined ? (
-          <div></div>
-        ) : (
-          <div>Bungie Profile is set to private :(.</div>
-        )}</div> : <Row className="mb-3">
-        <Col xs={3}>
-          <Form.Label>Enter Bungie ID to see match history</Form.Label>
+      {mobileLayout ? (
+        <div>
+          <Form.Label style={{ width: "100vw" }}>
+            Enter Bungie ID to see match history
+          </Form.Label>
           <InputGroup hasValidation>
             <Form.Control
               required
@@ -516,9 +532,6 @@ function CompetetiveStats() {
             </Button>
           </InputGroup>
           {invalidText}
-        </Col>
-        <Col xs={9}>
-
           {loading ? (
             <div>
               Loading <Spinner animation="border" size="sm" />
@@ -530,9 +543,48 @@ function CompetetiveStats() {
           ) : (
             <div>Bungie Profile is set to private :(.</div>
           )}
-        </Col>
-      </Row>
-      }
+        </div>
+      ) : (
+        <Row className="mb-3">
+          <Col xs={3}>
+            <Form.Label>Enter Bungie ID to see match history</Form.Label>
+            <InputGroup hasValidation>
+              <Form.Control
+                required
+                id="userBungieId"
+                placeholder="Enter Bungie ID here..."
+                aria-label="bungieIdInput"
+                type="text"
+                pattern=".+#\d{4}$"
+                onChange={(e) => {
+                  setBungieId(e.target.value);
+                }}
+              />
+              <Button
+                variant="outline-primary"
+                type="button"
+                onClick={handleClick}
+              >
+                Submit
+              </Button>
+            </InputGroup>
+            {invalidText}
+          </Col>
+          <Col xs={9}>
+            {loading ? (
+              <div>
+                Loading <Spinner animation="border" size="sm" />
+              </div>
+            ) : player?.isPublic ? (
+              <Accordion key="PGCR Matches">{pgcrItems}</Accordion>
+            ) : player?.isPublic === undefined ? (
+              <div></div>
+            ) : (
+              <div>Bungie Profile is set to private :(.</div>
+            )}
+          </Col>
+        </Row>
+      )}
     </Container>
   );
 }
