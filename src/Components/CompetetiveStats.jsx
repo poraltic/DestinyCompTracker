@@ -467,7 +467,6 @@ function CompetetiveStats() {
         );
       }
     );
-    console.log(accordionItems.length);
     setpgcrItems(accordionItems);
   };
 
