@@ -1,6 +1,6 @@
 {
   "name": "package.json",
-  "homepage": "https://poraltic.github.io/destinyCompTracker",
+  "homepage": "https://poraltic.github.io/DestinyCompTracker",
   "private": true,
   "version": "0.0.0",
   "type": "module",
