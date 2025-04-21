@@ -227,7 +227,6 @@ function CompetetiveStats() {
                 };
               });
 
-              //TODO: check ispublic to see if we can display the profile, finish building the table for the teams/players.
               for (let playerEntry of playerEntries) {
                 const isPublic = playerEntry.player.destinyUserInfo.isPublic;
                 if (!isPublic) {
@@ -362,7 +361,7 @@ function CompetetiveStats() {
         >
           <td align="center">
             {player.isPublic ? (
-              player?.rank === undefined ? ( 
+              player?.rank === undefined ? (
                 "NonComp"
               ) : (
                 <div>
@@ -390,7 +389,7 @@ function CompetetiveStats() {
     }
   };
   const finalizePGCRs = (payload) => {
-    const accordionItems = _.orderBy(payload.PGCRs, "period", 'desc').map(
+    const accordionItems = _.orderBy(payload.PGCRs, "period", "desc").map(
       (PGCR, index) => {
         const teamTables = PGCR.teams.map((team, index) => {
           return mobileLayout ? (
