@@ -200,7 +200,7 @@ function CompetetiveStats() {
       instanceIds.map((id) => {
         return axios({
           ...baseConfig,
-          url: `${API_CALLS.COMMON_URL}/Destiny2/Stats/PostGameCarnageReport/${id}/ `,
+          url: `${API_CALLS.COMMON_URL}/Destiny2/Stats/PostGameCarnageReport/${id}`,
         });
       })
     ).then(async (responses) => {
