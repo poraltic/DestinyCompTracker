@@ -369,20 +369,20 @@ function CompetetiveStats() {
                     src={player.rank.rankIconSrc}
                     alt={player.rank.rankDivision}
                     title={player.rank.rankDivision}
-                    height="75rem"
-                    width="75rem"
+                    height="50rem"
+                    width="50rem"
                   ></img>
-                  <p>{player.rank.progress}</p>
+                  <p style={{fontSize: "0.5rem", marginBottom: "0"}}>{player.rank.rankDivision}</p>
+                  <p style={{fontSize: "0.5rem"}}>{player.rank.progress}</p>
                 </div>
               )
             ) : (
               "Privated"
             )}
           </td>
-          <td>{player.bungieGlobalDisplayName}</td>
+          <td style={{overflowWrap: "anywhere"}}>{player.bungieGlobalDisplayName}</td>
           <td>{player.kills}</td>
           <td>{player.deaths}</td>
-          <td>{player.assists}</td>
           <td>{player.kdr}</td>
         </tr>
       ));
@@ -393,15 +393,15 @@ function CompetetiveStats() {
       (PGCR, index) => {
         const teamTables = PGCR.teams.map((team, index) => {
           return mobileLayout ? (
-            <div>
+            <div style={{fontSize: "1rem"}}>
               <h1 align="center">{team.standing.standing}</h1>
               <h1 align="center">{team.standing.score}</h1>
               <Table
                 striped
                 bordered
-                hover
+                size="sm"
                 key={index + 1000000000}
-                style={{ maxWidth: "90vw", tableLayout: "fixed" }}
+                style={{ maxWidth: "100vw", tableLayout: "fixed", fontSize: "0.75rem" }}
               >
                 <thead>
                   <tr
@@ -409,14 +409,13 @@ function CompetetiveStats() {
                       index +
                       100 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
                     }
-                    style={{ width: "90vw" }}
+                    className="bg-success"
                   >
                     <th>Rank</th>
                     <th>Player</th>
                     <th>Kills</th>
                     <th>Deaths</th>
-                    <th>Assists</th>
-                    <th>KDA</th>
+                    <th>KD</th>
                   </tr>
                 </thead>
                 <tbody>{genTables(team)}</tbody>
@@ -429,7 +428,8 @@ function CompetetiveStats() {
               <Table
                 striped
                 bordered
-                hover
+                size="sm"
+                class="--bs-success"
                 key={index + 1000000000 /* possibly do teamId + instanceId*/}
                 style={{ maxWidth: "90vw" }}
               >
@@ -505,8 +505,8 @@ function CompetetiveStats() {
   return (
     <Container fluid="xs" className="py-4 px-3">
       {mobileLayout ? (
-        <div>
-          <Form.Label style={{ width: "100vw" }}>
+        <div align="center">
+          <Form.Label>
             Enter Bungie ID to see match history
           </Form.Label>
           <InputGroup hasValidation>
@@ -535,7 +535,7 @@ function CompetetiveStats() {
               Loading <Spinner animation="border" size="sm" />
             </div>
           ) : player?.isPublic ? (
-            <Accordion key="unique">{pgcrItems}</Accordion>
+            <Accordion key="unique" style={{marginTop: "1rem"}}>{pgcrItems}</Accordion>
           ) : player?.isPublic === undefined ? (
             <div></div>
           ) : (
