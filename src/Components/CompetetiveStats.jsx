@@ -110,6 +110,9 @@ function CompetetiveStats() {
         });
       })
     ).then((responses) => {
+      //TODO:
+      //1: pull referenceId for map details using this call /Platform/Destiny2/Manifest/DestinyActivityDefinition/${referenceId}/
+      //2: pull player standing to display on accordion header
       responses.map((response) => {
         response.data.Response.activities.map((instance) => {
           if (new Date(instance.period) > checkDate) {
@@ -352,7 +355,7 @@ function CompetetiveStats() {
 
   const genTables = (team) => {
     {
-      return team.players.map((player, index) => (
+      return mobileLayout ? team.players.map((player, index) => (
         <tr
           key={
             index +
@@ -383,6 +386,40 @@ function CompetetiveStats() {
           <td style={{overflowWrap: "anywhere"}}>{player.bungieGlobalDisplayName}</td>
           <td>{player.kills}</td>
           <td>{player.deaths}</td>
+          <td>{player.kdr}</td>
+        </tr>
+      )) : team.players.map((player, index) => (
+        <tr
+          key={
+            index +
+            100000000 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+          }
+        >
+          <td align="center">
+            {player.isPublic ? (
+              player?.rank === undefined ? (
+                "NonComp"
+              ) : (
+                <div>
+                  <img
+                    src={player.rank.rankIconSrc}
+                    alt={player.rank.rankDivision}
+                    title={player.rank.rankDivision}
+                    height="75rem"
+                    width="75rem"
+                  ></img>
+                  <p style={{fontSize: "1rem", marginBottom: "0"}}>{player.rank.rankDivision}</p>
+                  <p style={{fontSize: "1rem"}}>{player.rank.progress}</p>
+                </div>
+              )
+            ) : (
+              "Privated"
+            )}
+          </td>
+          <td style={{overflowWrap: "anywhere"}}>{player.bungieGlobalDisplayName}</td>
+          <td>{player.kills}</td>
+          <td>{player.deaths}</td>
+          <td>{player.assists}</td>
           <td>{player.kdr}</td>
         </tr>
       ));
