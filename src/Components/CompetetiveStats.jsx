@@ -11,7 +11,7 @@ import axios from "axios";
 import { API_CALLS } from "./helpers/API_CALLS";
 import Table from "react-bootstrap/Table";
 import rankLevels from "./helpers/rankLevels";
-import compMapNames from "./helpers/compMapNames"
+import compMapNames from "./helpers/compMapNames";
 import _ from "lodash";
 
 function CompetetiveStats() {
@@ -174,7 +174,7 @@ function CompetetiveStats() {
       }
     } catch (e) {
       console.log(`ERROR: ${e}`);
-      console.log(playerEntry)
+      console.log(playerEntry);
     }
   };
 
@@ -210,7 +210,7 @@ function CompetetiveStats() {
           ...baseConfig,
           url: `${API_CALLS.COMMON_URL}/Destiny2/Stats/PostGameCarnageReport/${instance.instanceId}`,
         });
-        return {...response, personalStanding: instance.personalStanding}
+        return { ...response, personalStanding: instance.personalStanding };
       })
     ).then(async (responses) => {
       let chunkedResponses = _.chunk(responses, 2);
@@ -224,7 +224,8 @@ function CompetetiveStats() {
             const teamTwoPlayers = [];
             let period = response.data.Response.period;
             let modeName = getModeName(mode);
-            const mapName = compMapNames[response.data.Response.activityDetails.referenceId];
+            const mapName =
+              compMapNames[response.data.Response.activityDetails.referenceId];
             try {
               teams = response.data.Response.teams.map((team) => {
                 return {
@@ -344,7 +345,7 @@ function CompetetiveStats() {
               PGCRs.push({
                 personalStanding: response.personalStanding,
                 mapName,
-                period: new Date(period).toLocaleString(),
+                period,
                 modeName,
                 teams: consolidatedTeams,
               });
@@ -364,74 +365,86 @@ function CompetetiveStats() {
 
   const genTables = (team) => {
     {
-      return mobileLayout ? team.players.map((player, index) => (
-        <tr
-          key={
-            index +
-            100000000 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
-          }
-        >
-          <td align="center">
-            {player.isPublic ? (
-              player?.rank === undefined ? (
-                "NonComp"
-              ) : (
-                <div>
-                  <img
-                    src={player.rank.rankIconSrc}
-                    alt={player.rank.rankDivision}
-                    title={player.rank.rankDivision}
-                    height="50rem"
-                    width="50rem"
-                  ></img>
-                  <p style={{fontSize: "0.5rem", marginBottom: "0"}}>{player.rank.rankDivision}</p>
-                  <p style={{fontSize: "0.5rem"}}>{player.rank.progress}</p>
-                </div>
-              )
-            ) : (
-              "Privated"
-            )}
-          </td>
-          <td style={{overflowWrap: "anywhere"}}>{player.bungieGlobalDisplayName}</td>
-          <td>{player.kills}</td>
-          <td>{player.deaths}</td>
-          <td>{player.kdr}</td>
-        </tr>
-      )) : team.players.map((player, index) => (
-        <tr
-          key={
-            index +
-            100000000 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
-          }
-        >
-          <td align="center">
-            {player.isPublic ? (
-              player?.rank === undefined ? (
-                "NonComp"
-              ) : (
-                <div>
-                  <img
-                    src={player.rank.rankIconSrc}
-                    alt={player.rank.rankDivision}
-                    title={player.rank.rankDivision}
-                    height="75rem"
-                    width="75rem"
-                  ></img>
-                  <p style={{fontSize: "1rem", marginBottom: "0"}}>{player.rank.rankDivision}</p>
-                  <p style={{fontSize: "1rem"}}>{player.rank.progress}</p>
-                </div>
-              )
-            ) : (
-              "Privated"
-            )}
-          </td>
-          <td style={{overflowWrap: "anywhere"}}>{player.bungieGlobalDisplayName}</td>
-          <td>{player.kills}</td>
-          <td>{player.deaths}</td>
-          <td>{player.assists}</td>
-          <td>{player.kdr}</td>
-        </tr>
-      ));
+      return mobileLayout
+        ? team.players.map((player, index) => (
+            <tr
+              key={
+                index +
+                100000000 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+              }
+            >
+              <td align="center">
+                {player.isPublic ? (
+                  player?.rank === undefined ? (
+                    "NonComp"
+                  ) : (
+                    <div>
+                      <img
+                        src={player.rank.rankIconSrc}
+                        alt={player.rank.rankDivision}
+                        title={player.rank.rankDivision}
+                        height="50rem"
+                        width="50rem"
+                      ></img>
+                      <p style={{ fontSize: "0.5rem", marginBottom: "0" }}>
+                        {player.rank.rankDivision}
+                      </p>
+                      <p style={{ fontSize: "0.5rem" }}>
+                        {player.rank.progress}
+                      </p>
+                    </div>
+                  )
+                ) : (
+                  "Privated"
+                )}
+              </td>
+              <td style={{ overflowWrap: "anywhere" }}>
+                {player.bungieGlobalDisplayName}
+              </td>
+              <td>{player.kills}</td>
+              <td>{player.deaths}</td>
+              <td>{player.kdr}</td>
+            </tr>
+          ))
+        : team.players.map((player, index) => (
+            <tr
+              key={
+                index +
+                100000000 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+              }
+            >
+              <td align="center">
+                {player.isPublic ? (
+                  player?.rank === undefined ? (
+                    "NonComp"
+                  ) : (
+                    <div>
+                      <img
+                        src={player.rank.rankIconSrc}
+                        alt={player.rank.rankDivision}
+                        title={player.rank.rankDivision}
+                        height="75rem"
+                        width="75rem"
+                      ></img>
+                      <p style={{ fontSize: "1rem", marginBottom: "0" }}>
+                        {player.rank.rankDivision}
+                      </p>
+                      <p style={{ fontSize: "1rem" }}>{player.rank.progress}</p>
+                    </div>
+                  )
+                ) : (
+                  "Privated"
+                )}
+              </td>
+              <td style={{ overflowWrap: "anywhere" }}>
+                {player.bungieGlobalDisplayName}
+              </td>
+              <td>{player.kills}</td>
+              <td>{player.deaths}</td>
+              <td>{player.assists}</td>
+              <td>{player.kdr}</td>
+            </tr>
+          ));
     }
   };
   const finalizePGCRs = (payload) => {
@@ -439,7 +452,7 @@ function CompetetiveStats() {
       (PGCR, index) => {
         const teamTables = PGCR.teams.map((team, index) => {
           return mobileLayout ? (
-            <div style={{fontSize: "1rem"}}>
+            <div style={{ fontSize: "1rem" }}>
               <h1 align="center">{team.standing.standing}</h1>
               <h1 align="center">{team.standing.score}</h1>
               <Table
@@ -447,7 +460,11 @@ function CompetetiveStats() {
                 bordered
                 size="sm"
                 key={index + 1000000000}
-                style={{ maxWidth: "100vw", tableLayout: "fixed", fontSize: "0.75rem" }}
+                style={{
+                  maxWidth: "100vw",
+                  tableLayout: "fixed",
+                  fontSize: "0.75rem",
+                }}
               >
                 <thead>
                   <tr
@@ -502,7 +519,19 @@ function CompetetiveStats() {
         return (
           <Accordion.Item eventKey={index} key={index}>
             <Accordion.Header>
-              {PGCR.personalStanding === "Defeat" ? <div><span className="text-danger">{PGCR.personalStanding}</span> - {PGCR.mapName} - {PGCR.modeName} - {PGCR.period}</div> : <div><span className="text-success">{PGCR.personalStanding}</span> - {PGCR.mapName} - {PGCR.modeName} - {PGCR.period}</div>}
+              {PGCR.personalStanding === "Defeat" ? (
+                <div>
+                  <span className="text-danger">{PGCR.personalStanding}</span> -{" "}
+                  {PGCR.mapName} - {PGCR.modeName} -{" "}
+                  {new Date(PGCR.period).toLocaleString()}
+                </div>
+              ) : (
+                <div>
+                  <span className="text-success">{PGCR.personalStanding}</span>{" "}
+                  - {PGCR.mapName} - {PGCR.modeName} -{" "}
+                  {new Date(PGCR.period).toLocaleString()}
+                </div>
+              )}
             </Accordion.Header>
             <Accordion.Body key={index + 100000}>
               <Row>{teamTables}</Row>
@@ -551,9 +580,7 @@ function CompetetiveStats() {
     <Container fluid="xs" className="py-4 px-3">
       {mobileLayout ? (
         <div align="center">
-          <Form.Label>
-            Enter Bungie ID to see match history
-          </Form.Label>
+          <Form.Label>Enter Bungie ID to see match history</Form.Label>
           <InputGroup hasValidation>
             <Form.Control
               required
@@ -580,7 +607,9 @@ function CompetetiveStats() {
               Loading <Spinner animation="border" size="sm" />
             </div>
           ) : player?.isPublic ? (
-            <Accordion key="unique" style={{marginTop: "1rem"}}>{pgcrItems}</Accordion>
+            <Accordion key="unique" style={{ marginTop: "1rem" }}>
+              {pgcrItems}
+            </Accordion>
           ) : player?.isPublic === undefined ? (
             <div></div>
           ) : (
