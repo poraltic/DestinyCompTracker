@@ -11,6 +11,7 @@ import axios from "axios";
 import { API_CALLS } from "./helpers/API_CALLS";
 import Table from "react-bootstrap/Table";
 import rankLevels from "./helpers/rankLevels";
+import compMapNames from "./helpers/compMapNames"
 import _ from "lodash";
 
 function CompetetiveStats() {
@@ -89,7 +90,7 @@ function CompetetiveStats() {
   };
 
   const gatherInstanceIds = async (profile) => {
-    let instanceIds = [];
+    let instances = [];
     const today = new Date();
     const checkDate = new Date(new Date().setDate(today.getDate() - 30));
     const characterIds = profile.characterIds;
@@ -116,14 +117,17 @@ function CompetetiveStats() {
       responses.map((response) => {
         response.data.Response.activities.map((instance) => {
           if (new Date(instance.period) > checkDate) {
-            instanceIds.push(instance.activityDetails.instanceId);
+            instances.push({
+              instanceId: instance.activityDetails.instanceId,
+              personalStanding: instance.values.standing.basic.displayValue,
+            });
           }
         });
       });
     });
     return {
       ...profile,
-      instanceIds,
+      instances,
     };
   };
 
@@ -170,6 +174,7 @@ function CompetetiveStats() {
       }
     } catch (e) {
       console.log(`ERROR: ${e}`);
+      console.log(playerEntry)
     }
   };
 
@@ -189,7 +194,7 @@ function CompetetiveStats() {
   };
 
   const gatherPGCRs = async (profile) => {
-    let instanceIds = profile.instanceIds;
+    let instances = profile.instances;
     let PGCRs = [];
     const baseConfig = {
       method: "get",
@@ -200,11 +205,12 @@ function CompetetiveStats() {
     };
 
     await Promise.all(
-      instanceIds.map((id) => {
-        return axios({
+      instances.map(async (instance) => {
+        let response = await axios({
           ...baseConfig,
-          url: `${API_CALLS.COMMON_URL}/Destiny2/Stats/PostGameCarnageReport/${id}`,
+          url: `${API_CALLS.COMMON_URL}/Destiny2/Stats/PostGameCarnageReport/${instance.instanceId}`,
         });
+        return {...response, personalStanding: instance.personalStanding}
       })
     ).then(async (responses) => {
       let chunkedResponses = _.chunk(responses, 2);
@@ -218,6 +224,7 @@ function CompetetiveStats() {
             const teamTwoPlayers = [];
             let period = response.data.Response.period;
             let modeName = getModeName(mode);
+            const mapName = compMapNames[response.data.Response.activityDetails.referenceId];
             try {
               teams = response.data.Response.teams.map((team) => {
                 return {
@@ -335,7 +342,9 @@ function CompetetiveStats() {
                 },
               ];
               PGCRs.push({
-                period,
+                personalStanding: response.personalStanding,
+                mapName,
+                period: new Date(period).toLocaleString(),
                 modeName,
                 teams: consolidatedTeams,
               });
@@ -446,7 +455,6 @@ function CompetetiveStats() {
                       index +
                       100 /* possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
                     }
-                    className="bg-success"
                   >
                     <th>Rank</th>
                     <th>Player</th>
@@ -494,7 +502,7 @@ function CompetetiveStats() {
         return (
           <Accordion.Item eventKey={index} key={index}>
             <Accordion.Header>
-              {PGCR.modeName} - {PGCR.period}
+              {PGCR.personalStanding === "Defeat" ? <div><span className="text-danger">{PGCR.personalStanding}</span> - {PGCR.mapName} - {PGCR.modeName} - {PGCR.period}</div> : <div><span className="text-success">{PGCR.personalStanding}</span> - {PGCR.mapName} - {PGCR.modeName} - {PGCR.period}</div>}
             </Accordion.Header>
             <Accordion.Body key={index + 100000}>
               <Row>{teamTables}</Row>

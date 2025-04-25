@@ -217,6 +217,12 @@ const rankLevels = {
         progressTotal: 4999,
         icon: "/common/destiny2_content/icons/2341581763d68250bc2e3b95e4cd2b02.png",
       },
+      {
+        stepName: "Ascendant 0",
+        displayEffectType: 0,
+        progressTotal: 0,
+        icon: "/common/destiny2_content/icons/2341581763d68250bc2e3b95e4cd2b02.png",
+      },
     ],
   }
 };
