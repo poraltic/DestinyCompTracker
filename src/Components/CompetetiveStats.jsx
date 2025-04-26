@@ -43,9 +43,10 @@ function CompetetiveStats() {
     };
     await axios(config)
       .then((response) => {
+        console.log(response.data.Response[0])
         crossSaveProfile =
-          response.data.Response.length === 1
-            ? response.data.Response[0].profile.membershipType
+        response.data.Response[0].crossSaveOverride === 0
+            ? response.data.Response[0]
             : response.data.Response.find((profile) => {
                 if (profile.crossSaveOverride === profile.membershipType)
                   return profile.membershipType;
