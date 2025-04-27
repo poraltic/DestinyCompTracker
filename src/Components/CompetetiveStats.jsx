@@ -116,14 +116,19 @@ function CompetetiveStats() {
       //1: pull referenceId for map details using this call /Platform/Destiny2/Manifest/DestinyActivityDefinition/${referenceId}/
       //2: pull player standing to display on accordion header
       responses.map((response) => {
-        response.data.Response.activities.map((instance) => {
-          if (new Date(instance.period) > checkDate) {
-            instances.push({
-              instanceId: instance.activityDetails.instanceId,
-              personalStanding: instance.values.standing.basic.displayValue,
-            });
-          }
-        });
+        try {
+          response.data.Response.activities.map((instance) => {
+            if (new Date(instance.period) > checkDate) {
+              instances.push({
+                instanceId: instance.activityDetails.instanceId,
+                personalStanding: instance.values.standing.basic.displayValue,
+              });
+            }
+          });
+        } catch (e){
+          console.log(e)
+        }
+        
       });
     });
     return {
