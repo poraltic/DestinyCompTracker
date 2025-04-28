@@ -26,5 +26,6 @@ const compMapNames = {
   788769683: "Javelin-4",
   1955511607: "Vostok",
   279800038: "Midtown",
+  780203647: "Radiant Cliffs",
 };
 export default compMapNames;
