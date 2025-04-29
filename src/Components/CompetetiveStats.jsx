@@ -43,7 +43,6 @@ function CompetetiveStats() {
     };
     await axios(config)
       .then((response) => {
-        console.log(response.data.Response[0])
         crossSaveProfile =
         response.data.Response[0].crossSaveOverride === 0
             ? response.data.Response[0]
