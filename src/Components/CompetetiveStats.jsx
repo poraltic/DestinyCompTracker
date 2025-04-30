@@ -245,6 +245,7 @@ function CompetetiveStats() {
 
               for (let playerEntry of playerEntries) {
                 const isPublic = playerEntry.player.destinyUserInfo.isPublic;
+                //TODO: fix this so it is more optimized and does not rely on teamOne and teamTwo but instead uses teamIds
                 if (!isPublic) {
                   teams[0].teamId === playerEntry.values.team.basic.value
                     ? teamOnePlayers.push({
