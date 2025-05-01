@@ -149,7 +149,7 @@ function CompetetiveStats() {
     const membershipType = playerEntry.player.destinyUserInfo.membershipType;
     const rankProgress = await axios({
       ...baseConfig,
-      url: `${API_CALLS.COMMON_URL}/Destiny2/${membershipType}/Profile/${membershipId}/?components=CharacterProgressions,Profiles`,
+      url: `${API_CALLS.COMMON_URL}/Destiny2/${membershipType}/Profile/${membershipId}/?components=CharacterProgressions`,
     });
     let progress;
     let step;
