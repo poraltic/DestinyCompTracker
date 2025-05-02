@@ -173,7 +173,7 @@ function CompetetiveStats() {
       } else {
         return {
           progress: "private",
-          rankDivision: "private",
+          rankDivision: "",
           isPublic: false,
         };
       }
