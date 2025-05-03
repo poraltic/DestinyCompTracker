@@ -619,7 +619,7 @@ function CompetetiveStats() {
           ) : player?.isPublic === undefined ? (
             <div></div>
           ) : (
-            <div>Bungie Profile is set to private :(.</div>
+            <div>Bungie Profile is set to private. Unable to display stats for this player</div>
           )}
         </div>
       ) : (
