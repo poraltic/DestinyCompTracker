@@ -576,6 +576,9 @@ function CompetetiveStats() {
         .then((payload) => {
           return finalizePGCRs(payload);
         })
+        .catch((e) => {
+          console.log(e);
+        })
         .finally(() => {
           setLoading(false);
         });
