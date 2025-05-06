@@ -27,5 +27,8 @@ const compMapNames = {
   1955511607: "Vostok",
   279800038: "Midtown",
   780203647: "Radiant Cliffs",
+  1118775268: "The Citadel",
+  64172690: "Midtown",
+  3305240901: "Multiplex",
 };
 export default compMapNames;

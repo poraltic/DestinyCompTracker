@@ -149,7 +149,7 @@ function CompetetiveStats() {
     const membershipType = playerEntry.player.destinyUserInfo.membershipType;
     const rankProgress = await axios({
       ...baseConfig,
-      url: `${API_CALLS.COMMON_URL}/Destiny2/${membershipType}/Profile/${membershipId}/?components=CharacterProgressions`,
+      url: `${API_CALLS.COMMON_URL}/Destiny2/${membershipType}/Profile/${membershipId}/?components=CharacterProgressions,Profiles`,
     });
     let progress;
     let step;
@@ -231,6 +231,8 @@ function CompetetiveStats() {
             let modeName = getModeName(mode);
             const mapName =
               compMapNames[response.data.Response.activityDetails.referenceId];
+              console.log(mapName);
+              console.log(response.data.Response.activityDetails.referenceId);
             try {
               teams = response.data.Response.teams.map((team) => {
                 return {
@@ -575,9 +577,6 @@ function CompetetiveStats() {
         })
         .then((payload) => {
           return finalizePGCRs(payload);
-        })
-        .catch((e) => {
-          console.log(e);
         })
         .finally(() => {
           setLoading(false);
