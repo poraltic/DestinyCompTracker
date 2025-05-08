@@ -44,7 +44,7 @@ function CompetetiveStats() {
     await axios(config)
       .then((response) => {
         crossSaveProfile =
-        response.data.Response[0].crossSaveOverride === 0
+          response.data.Response[0].crossSaveOverride === 0
             ? response.data.Response[0]
             : response.data.Response.find((profile) => {
                 if (profile.crossSaveOverride === profile.membershipType)
@@ -124,10 +124,9 @@ function CompetetiveStats() {
               });
             }
           });
-        } catch (e){
-          console.log(e)
+        } catch (e) {
+          console.log(e);
         }
-        
       });
     });
     return {
@@ -619,7 +618,10 @@ function CompetetiveStats() {
           ) : player?.isPublic === undefined ? (
             <div></div>
           ) : (
-            <div>Bungie Profile is set to private. Unable to display stats for this player.</div>
+            <div>
+              Bungie Profile is set to private. Unable to display stats for this
+              player.
+            </div>
           )}
         </div>
       ) : (
