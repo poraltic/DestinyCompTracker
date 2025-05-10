@@ -632,7 +632,7 @@ function CompetetiveStats() {
               <Form.Control
                 required
                 id="userBungieId"
-                placeholder="Enter Bungie ID here..."
+                placeholder="Enter Bungie ID here."
                 aria-label="bungieIdInput"
                 type="text"
                 pattern=".+#\d{4}$"
