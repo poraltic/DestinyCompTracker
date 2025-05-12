@@ -661,7 +661,7 @@ function CompetetiveStats() {
             ) : player?.isPublic === undefined ? (
               <div></div>
             ) : (
-              <div>Bungie Profile is set to private :(.</div>
+              <div>Bungie Profile is set to privat.</div>
             )}
           </Col>
         </Row>
