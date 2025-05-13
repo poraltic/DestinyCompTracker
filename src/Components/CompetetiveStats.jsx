@@ -192,6 +192,8 @@ function CompetetiveStats() {
         return "Competitive Clash (3v3)";
       case 84:
         return "Trials Of Osiris";
+      case 31:
+        return "Heavy Metal";
       default:
         return `tell lazy dev to add ${mode}`;
     }
@@ -230,6 +232,7 @@ function CompetetiveStats() {
             let modeName = getModeName(mode);
             const mapName =
               compMapNames[response.data.Response.activityDetails.referenceId];
+              console.log(response.data.Response.activityDetails.referenceId, mapName)
             try {
               teams = response.data.Response.teams.map((team) => {
                 return {

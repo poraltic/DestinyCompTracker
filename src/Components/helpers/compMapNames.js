@@ -30,5 +30,6 @@ const compMapNames = {
   1118775268: "The Citadel",
   64172690: "Midtown",
   3305240901: "Multiplex",
+  3664841924: "Fractured Expanse",
 };
 export default compMapNames;
