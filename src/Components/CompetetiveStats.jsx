@@ -232,7 +232,6 @@ function CompetetiveStats() {
             let modeName = getModeName(mode);
             const mapName =
               compMapNames[response.data.Response.activityDetails.referenceId];
-              console.log(response.data.Response.activityDetails.referenceId, mapName)
             try {
               teams = response.data.Response.teams.map((team) => {
                 return {
