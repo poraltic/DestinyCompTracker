@@ -377,7 +377,7 @@ function CompetetiveStats() {
             <tr
               key={
                 index +
-                100000000 /*TODO: possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+                100000000 /*TODO:possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
               }
             >
               <td align="center">
