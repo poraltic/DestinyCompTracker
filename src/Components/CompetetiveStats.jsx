@@ -377,7 +377,7 @@ function CompetetiveStats() {
             <tr
               key={
                 index +
-                100000000 /*TODO:possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
+                10 /*TODO:possibly do membershipId if available without additional lookup, if not then do instanceId + playerName*/
               }
             >
               <td align="center">
@@ -402,7 +402,7 @@ function CompetetiveStats() {
                     </div>
                   )
                 ) : (
-                  "Privated"
+                  "Private profile"
                 )}
               </td>
               <td style={{ overflowWrap: "anywhere" }}>
@@ -440,7 +440,7 @@ function CompetetiveStats() {
                     </div>
                   )
                 ) : (
-                  "Privated"
+                  "Privat profile"
                 )}
               </td>
               <td style={{ overflowWrap: "anywhere" }}>
