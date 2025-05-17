@@ -440,7 +440,7 @@ function CompetetiveStats() {
                     </div>
                   )
                 ) : (
-                  "Privat profile"
+                  "Private profile"
                 )}
               </td>
               <td style={{ overflowWrap: "anywhere" }}>
