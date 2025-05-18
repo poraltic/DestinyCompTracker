@@ -587,7 +587,7 @@ function CompetetiveStats() {
     <Container fluid="xs" className="py-4 px-3">
       {mobileLayout ? (
         <div align="center">
-          <Form.Label>Enter Bungie ID to see match history</Form.Label>
+          <Form.Label>Enter Bungie ID to see crucible match history</Form.Label>
           <InputGroup hasValidation>
             <Form.Control
               required
@@ -629,7 +629,7 @@ function CompetetiveStats() {
       ) : (
         <Row className="mb-3">
           <Col xs={3}>
-            <Form.Label>Enter Bungie ID to see match history</Form.Label>
+            <Form.Label>Enter Bungie ID to see crucible match history</Form.Label>
             <InputGroup hasValidation>
               <Form.Control
                 required
@@ -663,7 +663,8 @@ function CompetetiveStats() {
             ) : player?.isPublic === undefined ? (
               <div></div>
             ) : (
-              <div>Bungie Profile is set to privat.</div>
+              <div>Bungie Profile is set to private. Unable to display stats for this
+              player.</div>
             )}
           </Col>
         </Row>
