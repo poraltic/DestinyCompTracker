@@ -629,7 +629,9 @@ function CompetetiveStats() {
       ) : (
         <Row className="mb-3">
           <Col xs={3}>
-            <Form.Label>Enter Bungie ID to see crucible match history</Form.Label>
+            <Form.Label>
+              Enter Bungie ID to see crucible match history
+            </Form.Label>
             <InputGroup hasValidation>
               <Form.Control
                 required
@@ -663,8 +665,10 @@ function CompetetiveStats() {
             ) : player?.isPublic === undefined ? (
               <div></div>
             ) : (
-              <div>Bungie Profile is set to private. Unable to display stats for this
-              player.</div>
+              <div>
+                Bungie Profile is set to private. Unable to display stats for
+                this player.
+              </div>
             )}
           </Col>
         </Row>
