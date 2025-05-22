@@ -555,7 +555,7 @@ function CompetetiveStats() {
       setinvalidText(
         <div className="text-danger">
           Please Enter a valid bungie ID that follows the format of My Bungie
-          ID#1234
+          ID#1234.
         </div>
       );
     } else {
