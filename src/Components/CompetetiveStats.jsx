@@ -515,7 +515,7 @@ function CompetetiveStats() {
                     <th>Kills</th>
                     <th>Deaths</th>
                     <th>Assists</th>
-                    <th>KDA</th>
+                    <th>KD</th>
                   </tr>
                 </thead>
                 <tbody>{genTables(team)}</tbody>
