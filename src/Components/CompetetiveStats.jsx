@@ -14,6 +14,8 @@ import rankLevels from "./helpers/rankLevels";
 import compMapNames from "./helpers/compMapNames";
 import _ from "lodash";
 
+//provide more details about code and reasoning behind specific code
+
 function CompetetiveStats() {
   const apiKey = import.meta.env.VITE_API_KEY;
   const [invalidText, setinvalidText] = useState(null);
