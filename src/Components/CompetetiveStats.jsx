@@ -17,6 +17,7 @@ import _ from "lodash";
 //provide more details about code and reasoning behind specific code
 
 function CompetetiveStats() {
+  //maybe move this to a backend in the future
   const apiKey = import.meta.env.VITE_API_KEY;
   const [invalidText, setinvalidText] = useState(null);
   const [pgcrItems, setpgcrItems] = useState([]);
