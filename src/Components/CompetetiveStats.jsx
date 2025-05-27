@@ -28,6 +28,7 @@ function CompetetiveStats() {
   const regEx = new RegExp(/.+#\d{4}$/);
 
   const gatherPlayerData = async (userBungieId) => {
+    //TODO: create a better way of splitting this
     const [displayName, displayNameCode] = userBungieId.split("#");
     const data = JSON.stringify({
       displayName,
