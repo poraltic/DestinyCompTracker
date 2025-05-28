@@ -591,7 +591,9 @@ function CompetetiveStats() {
     <Container fluid="xs" className="py-4 px-3">
       {mobileLayout ? (
         <div align="center">
-          <Form.Label>Enter Bungie ID to see competitive crucible match history</Form.Label>
+          <Form.Label>
+            Enter Bungie ID to see competitive crucible match history
+          </Form.Label>
           <InputGroup hasValidation>
             <Form.Control
               required
