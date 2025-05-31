@@ -35,7 +35,7 @@ function CompetetiveStats() {
       displayNameCode,
     });
 
-    let crossSaveProfile = "";
+    let crossSaveProfile;
     const config = {
       method: "post",
       url: `${API_CALLS.COMMON_URL}${API_CALLS.GET_MEMBERSHIP_ID}`,
