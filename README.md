@@ -1,3 +1,3 @@
-This is a site that is used to find your own competitive rank and the rank of your teammates in competitive destiny.  It is still going through some changes and will continue to improve over time.
+This is a site that is used to find your own competitive rank and the rank of your teammates in competitive destiny.  It is still going through some changes and will continue to improve over time. This site currently only pulls your last 50 games per character for the last 30 days. I also only access crucible game modes with a primary focus of Competitive crucible game modes.
 
 created by Estevan Mora
