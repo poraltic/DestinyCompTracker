@@ -659,7 +659,7 @@ function CompetetiveStats() {
               </Button>
             </InputGroup>
             {invalidText}
-            {/* <div>TODO: This is placeholder until I can add in more text to describe what this website is and how to ask for bug issues to resolved</div> */}
+            {/* <div>TODO: This is placeholder until I can add in more text to describe what this website is and how to ask for bug issues to resolved </div> */}
           </Col>
           <Col xs={9}>
             {loading ? (
