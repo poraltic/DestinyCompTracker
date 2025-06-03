@@ -36,6 +36,7 @@ function CompetetiveStats() {
     });
 
     let crossSaveProfile;
+    //TODO: deliberate if it's worth moving this to a dedicated backend.
     const config = {
       method: "post",
       url: `${API_CALLS.COMMON_URL}${API_CALLS.GET_MEMBERSHIP_ID}`,
