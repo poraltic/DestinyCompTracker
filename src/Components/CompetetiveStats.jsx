@@ -70,6 +70,7 @@ function CompetetiveStats() {
     return crossSaveProfile;
   };
 
+  //TODO: move helper functions to a helper file
   const gatherCharactersForPlayer = async (profile) => {
     let profileWithIds = {};
     const config = {
