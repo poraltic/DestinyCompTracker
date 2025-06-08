@@ -1,3 +1,4 @@
+//TODO: add all the map names here.
 const compMapNames = {
   1008195646: "Fragment",
   2296512046: "Endless Vale",
