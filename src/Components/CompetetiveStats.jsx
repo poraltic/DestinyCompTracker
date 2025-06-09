@@ -189,6 +189,7 @@ function CompetetiveStats() {
   };
 
   const getModeName = (mode) => {
+    //TODO: add more game modes in the future
     switch (mode) {
       case 43:
         return "Iron Banner Control";
