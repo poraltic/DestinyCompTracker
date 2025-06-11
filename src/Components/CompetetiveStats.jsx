@@ -227,6 +227,7 @@ function CompetetiveStats() {
       })
     ).then(async (responses) => {
       let chunkedResponses = _.chunk(responses, 2);
+      //TODO: fix this so the entire function does not have toe be in this Promise.all
       await Promise.all(
         chunkedResponses.map(async (responses) => {
           for (let response of responses) {
