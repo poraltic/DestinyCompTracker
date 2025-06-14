@@ -142,6 +142,7 @@ function CompetetiveStats() {
   };
 
   const getRank = async (playerEntry) => {
+    //TODO: move the apikey somewhere else so it is not easily findable
     const baseConfig = {
       method: "get",
       headers: {
