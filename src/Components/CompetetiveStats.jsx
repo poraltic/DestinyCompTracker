@@ -619,6 +619,23 @@ function CompetetiveStats() {
               Submit
             </Button>
           </InputGroup>
+          <Button 
+          variant="outline-secondary"
+          onClick={() => {
+            setBungieId('Purraltic#1665')
+
+          }}
+          >
+            Purraltic
+          </Button>
+          <Button 
+          variant="outline-secondary"
+          onClick={() => {
+            setBungieId('TheGallopingKing#8269')
+          }}
+          >
+          TheGallopingKing
+          </Button>
           {invalidText}
           {loading ? (
             <div>
@@ -663,6 +680,14 @@ function CompetetiveStats() {
                 Submit
               </Button>
             </InputGroup>
+            <ToggleButtonGroup type="radio" name="options">
+        <ToggleButton id="tbg-radio-1" value={'Purraltic#1665'}>
+          Purraltic
+        </ToggleButton>
+        <ToggleButton id="tbg-radio-2" value={'TheGallopingKing#8269'}>
+          TheGallopingKing
+        </ToggleButton>
+      </ToggleButtonGroup>
             {invalidText}
             {/* <div>TODO: This is placeholder until I can add in more text to describe what this website is and how to ask for bug issues to resolved </div> */}
           </Col>
